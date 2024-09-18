@@ -98,3 +98,37 @@ def log_forward(V, a, b, initial_distribution):
 alpha_log = log_forward(V, a, b, initial_distribution)
 print("Log-Alpha (log-forward probabilities):")
 print(alpha_log)
+
+def backward(V, a, b):
+    beta = np.zeros((V.shape[0], a.shape[0]))
+
+    # setting beta(T) = 1
+    beta[V.shape[0] - 1] = np.ones((a.shape[0]))
+    
+    # Loop in backward way from T-1 to
+    # Due to python indexing the actual loop will be T-2 to 0
+    for t in range(V.shape[0] - 2, -1, -1):
+        for j in range(a.shape[0]):
+            beta[t, j] = (beta[t + 1] * b[:, V[t + 1]]).dot(a[j, :])
+    
+    return beta
+
+beta = backward(V, a, b)
+print(beta)
+
+def log_backward(V, a, b):
+    log_a = np.log(a)
+    log_b = np.log(b)
+
+    beta = np.zeros((V.shape[0], log_a.shape[0]))
+    
+    beta[V.shape[0] - 1] = 0
+
+    for t in range(V.shape[0] - 2, -1, -1):
+        for j in range(a.shape[0]):
+            beta[t, j] = np.logaddexp.reduce(log_a[j, :] + log_b[:, V[t + 1]] + beta[t + 1])
+
+    return beta
+
+beta_log = log_backward(V, a, b)
+print(beta_log)
